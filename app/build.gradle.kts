@@ -142,7 +142,7 @@ dependencies {
 //    implementation("org.jsoup:jsoup:1.13.1")
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.13.1")
 
-    implementation("androidx.preference:preference-ktx:1.2.0")
+    implementation("androidx.preference:preference-ktx:1.2.1")
 
     implementation("com.github.bumptech.glide:glide:4.13.1")
     kapt("com.github.bumptech.glide:compiler:4.13.1")
