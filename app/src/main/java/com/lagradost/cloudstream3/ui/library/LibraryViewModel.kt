@@ -6,12 +6,14 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.lagradost.cloudstream3.AcraApplication.Companion.getKey
 import com.lagradost.cloudstream3.AcraApplication.Companion.setKey
+import com.lagradost.cloudstream3.MainActivity
 import com.lagradost.cloudstream3.R
 import com.lagradost.cloudstream3.mvvm.Resource
 import com.lagradost.cloudstream3.syncproviders.AccountManager.Companion.SyncApis
 import com.lagradost.cloudstream3.syncproviders.SyncAPI
 import com.lagradost.cloudstream3.utils.Coroutines.ioSafe
-import kotlinx.coroutines.delay
+import com.lagradost.cloudstream3.utils.DataStoreHelper
+import com.lagradost.cloudstream3.utils.DataStoreHelper.currentAccount
 
 enum class ListSorting(@StringRes val stringRes: Int) {
     Query(R.string.none),
@@ -21,11 +23,20 @@ enum class ListSorting(@StringRes val stringRes: Int) {
     UpdatedOld(R.string.sort_updated_old),
     AlphabeticalA(R.string.sort_alphabetical_a),
     AlphabeticalZ(R.string.sort_alphabetical_z),
+    ReleaseDateNew(R.string.sort_release_date_new),
+    ReleaseDateOld(R.string.sort_release_date_old),
 }
 
 const val LAST_SYNC_API_KEY = "last_sync_api"
 
 class LibraryViewModel : ViewModel() {
+    fun switchPage(page : Int) {
+        _currentPage.postValue(page)
+    }
+
+    private val _currentPage: MutableLiveData<Int> = MutableLiveData(0)
+    val currentPage: LiveData<Int> = _currentPage
+    
     private val _pages: MutableLiveData<Resource<List<SyncAPI.Page>>> = MutableLiveData(null)
     val pages: LiveData<Resource<List<SyncAPI.Page>>> = _pages
 
@@ -36,12 +47,12 @@ class LibraryViewModel : ViewModel() {
         get() = SyncApis.filter { it.hasAccount() }
 
     var currentSyncApi = availableSyncApis.let { allApis ->
-        val lastSelection = getKey<String>(LAST_SYNC_API_KEY)
+        val lastSelection = getKey<String>("$currentAccount/$LAST_SYNC_API_KEY")
         availableSyncApis.firstOrNull { it.name == lastSelection } ?: allApis.firstOrNull()
     }
         private set(value) {
             field = value
-            setKey(LAST_SYNC_API_KEY, field?.name)
+            setKey("$currentAccount/$LAST_SYNC_API_KEY", field?.name)
         }
 
     val availableApiNames: List<String>
@@ -59,13 +70,21 @@ class LibraryViewModel : ViewModel() {
         reloadPages(true)
     }
 
-    fun sort(method: ListSorting, query: String? = null) {
-        val currentList = pages.value ?: return
+    fun sort(method: ListSorting, query: String? = null) = ioSafe {
+        val value = _pages.value ?: return@ioSafe
+        if (value is Resource.Success) {
+            sort(method, query, value.value)
+        }
+    }
+
+    private fun sort(method: ListSorting, query: String? = null, items: List<SyncAPI.Page>) {
         currentSortingMethod = method
-        (currentList as? Resource.Success)?.value?.forEachIndexed { _, page ->
+        DataStoreHelper.librarySortingMode = method.ordinal
+
+        items.forEach { page ->
             page.sort(method, query)
         }
-        _pages.postValue(currentList)
+        _pages.postValue(Resource.Success(items))
     }
 
     fun reloadPages(forceReload: Boolean) {
@@ -86,8 +105,6 @@ class LibraryViewModel : ViewModel() {
                 val library = (libraryResource as? Resource.Success)?.value ?: return@let
 
                 sortingMethods = library.supportedListSorting.toList()
-                currentSortingMethod = null
-
                 repo.requireLibraryRefresh = false
 
                 val pages = library.allLibraryLists.map {
@@ -97,8 +114,24 @@ class LibraryViewModel : ViewModel() {
                     )
                 }
 
-                _pages.postValue(Resource.Success(pages))
+                val desiredSortingMethod =
+                    ListSorting.entries.getOrNull(DataStoreHelper.librarySortingMode)
+                if (desiredSortingMethod != null && library.supportedListSorting.contains(desiredSortingMethod)) {
+                    sort(desiredSortingMethod, null, pages)
+                } else {
+                    // null query = no sorting
+                    sort(ListSorting.Query, null, pages)
+                }
             }
         }
+    }
+
+    init {
+        MainActivity.reloadLibraryEvent += ::reloadPages
+    }
+
+    override fun onCleared() {
+        MainActivity.reloadLibraryEvent -= ::reloadPages
+        super.onCleared()
     }
 }

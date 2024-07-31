@@ -2,20 +2,26 @@ package com.lagradost.cloudstream3.ui.player
 
 import android.content.Context
 import android.util.Log
+import androidx.annotation.OptIn
 import androidx.preference.PreferenceManager
-import com.google.android.exoplayer2.Format
-import com.google.android.exoplayer2.text.*
-import com.google.android.exoplayer2.text.cea.Cea608Decoder
-import com.google.android.exoplayer2.text.cea.Cea708Decoder
-import com.google.android.exoplayer2.text.dvb.DvbDecoder
-import com.google.android.exoplayer2.text.pgs.PgsDecoder
-import com.google.android.exoplayer2.text.ssa.SsaDecoder
-import com.google.android.exoplayer2.text.subrip.SubripDecoder
-import com.google.android.exoplayer2.text.ttml.TtmlDecoder
-import com.google.android.exoplayer2.text.tx3g.Tx3gDecoder
-import com.google.android.exoplayer2.text.webvtt.Mp4WebvttDecoder
-import com.google.android.exoplayer2.text.webvtt.WebvttDecoder
-import com.google.android.exoplayer2.util.MimeTypes
+import androidx.media3.common.Format
+import androidx.media3.common.MimeTypes
+import androidx.media3.common.util.UnstableApi
+import androidx.media3.exoplayer.text.ExoplayerCuesDecoder
+import androidx.media3.exoplayer.text.SubtitleDecoderFactory
+import androidx.media3.extractor.text.SubtitleDecoder
+import androidx.media3.extractor.text.SubtitleInputBuffer
+import androidx.media3.extractor.text.SubtitleOutputBuffer
+import androidx.media3.extractor.text.cea.Cea608Decoder
+import androidx.media3.extractor.text.cea.Cea708Decoder
+import androidx.media3.extractor.text.dvb.DvbDecoder
+import androidx.media3.extractor.text.pgs.PgsDecoder
+import androidx.media3.extractor.text.ssa.SsaDecoder
+import androidx.media3.extractor.text.subrip.SubripDecoder
+import androidx.media3.extractor.text.ttml.TtmlDecoder
+import androidx.media3.extractor.text.tx3g.Tx3gDecoder
+import androidx.media3.extractor.text.webvtt.Mp4WebvttDecoder
+import androidx.media3.extractor.text.webvtt.WebvttDecoder
 import com.lagradost.cloudstream3.R
 import com.lagradost.cloudstream3.mvvm.logError
 import org.mozilla.universalchardet.UniversalDetector
@@ -26,6 +32,7 @@ import java.nio.charset.Charset
  * @param fallbackFormat used to create a decoder based on mimetype if the subtitle string is not
  * enough to identify the subtitle format.
  **/
+@OptIn(UnstableApi::class)
 class CustomDecoder(private val fallbackFormat: Format?) : SubtitleDecoder {
     companion object {
         fun updateForcedEncoding(context: Context) {
@@ -66,7 +73,7 @@ class CustomDecoder(private val fallbackFormat: Format?) : SubtitleDecoder {
                     RegexOption.IGNORE_CASE
                 ),
             )
-        val captionRegex = listOf(Regex("""(-\s?|)[\[({][\w\d\s]*?[])}]\s*"""))
+        val captionRegex = listOf(Regex("""(-\s?|)[\[({][\w\s]*?[])}]\s*"""))
 
         //https://emptycharacter.com/
         //https://www.fileformat.info/info/unicode/char/200b/index.htm
@@ -256,6 +263,7 @@ class CustomDecoder(private val fallbackFormat: Format?) : SubtitleDecoder {
 }
 
 /** See https://github.com/google/ExoPlayer/blob/release-v2/library/core/src/main/java/com/google/android/exoplayer2/text/SubtitleDecoderFactory.java */
+@OptIn(UnstableApi::class)
 class CustomSubtitleDecoderFactory : SubtitleDecoderFactory {
     override fun supportsFormat(format: Format): Boolean {
 //        return SubtitleDecoderFactory.DEFAULT.supportsFormat(format)

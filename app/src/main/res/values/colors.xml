@@ -13,7 +13,6 @@
     <color name="boxItemBackground">#161616</color> <!-- 17171B 1B1B20-->
 
     <color name="textColor">#e9eaee</color> <!--FFF-->
-    <color name="semiWhite">#1AFFFFFF</color> <!--FFF-->
     <color name="grayTextColor">#9ba0a4</color> <!-- 5e5f62-->
     <color name="grayShimmer">#DCDCDC</color> <!-- 5e5f62-->
 
@@ -82,7 +81,12 @@
     <color name="colorPrimaryGrey">#515151</color>
     <color name="colorPrimaryWhite">#FFFFFF</color>
     <color name="colorPrimaryBrown">#622C00</color>
+    <color name="colorPrimaryOrange">#CE8500</color>
+    <color name="colorPrimaryDandelionYellow">#F5BB00</color>
+    <color name="colorPrimaryCoolBlue">#408cac</color>
+    <color name="colorPrimaryLavender">#6F55AF</color>
 
     <color name="colorTestPass">#48E484</color>
     <color name="colorTestFail">#ea596e</color>
+    <color name="colorTestWarning">#FF9800</color>
 </resources>

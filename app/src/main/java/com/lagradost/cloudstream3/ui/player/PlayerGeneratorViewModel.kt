@@ -5,20 +5,22 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.lagradost.cloudstream3.LoadResponse
 import com.lagradost.cloudstream3.mvvm.Resource
 import com.lagradost.cloudstream3.mvvm.launchSafe
+import com.lagradost.cloudstream3.mvvm.logError
 import com.lagradost.cloudstream3.mvvm.normalSafeApiCall
 import com.lagradost.cloudstream3.mvvm.safeApiCall
 import com.lagradost.cloudstream3.ui.result.ResultEpisode
 import com.lagradost.cloudstream3.utils.Coroutines.ioSafe
 import com.lagradost.cloudstream3.utils.EpisodeSkip
 import com.lagradost.cloudstream3.utils.ExtractorLink
-import com.lagradost.cloudstream3.utils.ExtractorUri
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.launch
 
 class PlayerGeneratorViewModel : ViewModel() {
     companion object {
-        val TAG = "PlayViewGen"
+        const val TAG = "PlayViewGen"
     }
 
     private var generator: IGenerator? = null
@@ -37,6 +39,13 @@ class PlayerGeneratorViewModel : ViewModel() {
 
     private val _currentSubtitleYear = MutableLiveData<Int?>(null)
     val currentSubtitleYear: LiveData<Int?> = _currentSubtitleYear
+
+    /**
+     * Save the Episode ID to prevent starting multiple link loading Jobs when preloading links.
+     */
+    private var currentLoadingEpisodeId: Int? = null
+
+    var forceClearCache = false
 
     fun setSubtitleYear(year: Int?) {
         _currentSubtitleYear.postValue(year)
@@ -72,21 +81,38 @@ class PlayerGeneratorViewModel : ViewModel() {
     }
 
     fun preLoadNextLinks() {
+        val id = getId()
+        // Do not preload if already loading
+        if (id == currentLoadingEpisodeId) return
+
         Log.i(TAG, "preLoadNextLinks")
         currentJob?.cancel()
-        currentJob = viewModelScope.launchSafe {
-            if (generator?.hasCache == true && generator?.hasNext() == true) {
-                safeApiCall {
-                    generator?.generateLinks(
-                        clearCache = false,
-                        isCasting = false,
-                        {},
-                        {},
-                        offset = 1
-                    )
+        currentLoadingEpisodeId = id
+
+        currentJob = viewModelScope.launch {
+            try {
+                if (generator?.hasCache == true && generator?.hasNext() == true) {
+                    safeApiCall {
+                        generator?.generateLinks(
+                            type = LoadType.InApp,
+                            clearCache = false,
+                            callback = {},
+                            subtitleCallback = {},
+                            offset = 1
+                        )
+                    }
+                }
+            } catch (t: Throwable) {
+                logError(t)
+            } finally {
+                if (currentLoadingEpisodeId == id) {
+                    currentLoadingEpisodeId = null
                 }
             }
         }
+    }
+    fun getLoadResponse(): LoadResponse? {
+        return normalSafeApiCall { (generator as? RepoLinkGenerator?)?.page }
     }
 
     fun getMeta(): Any? {
@@ -147,7 +173,7 @@ class PlayerGeneratorViewModel : ViewModel() {
         }
     }
 
-    fun loadLinks(clearCache: Boolean = false, isCasting: Boolean = false) {
+    fun loadLinks(type: LoadType = LoadType.InApp) {
         Log.i(TAG, "loadLinks")
         currentJob?.cancel()
 
@@ -156,18 +182,24 @@ class PlayerGeneratorViewModel : ViewModel() {
             val currentSubs = mutableSetOf<SubtitleData>()
 
             // clear old data
-            _currentSubs.postValue(currentSubs)
-            _currentLinks.postValue(currentLinks)
+            _currentSubs.postValue(emptySet())
+            _currentLinks.postValue(emptySet())
 
             // load more data
             _loadingLinks.postValue(Resource.Loading())
             val loadingState = safeApiCall {
-                generator?.generateLinks(clearCache = clearCache, isCasting = isCasting, {
+                generator?.generateLinks(type = type, clearCache = forceClearCache, callback = {
                     currentLinks.add(it)
-                    _currentLinks.postValue(currentLinks)
-                }, {
+                    // Clone to prevent ConcurrentModificationException
+                    normalSafeApiCall {
+                        // Extra normalSafeApiCall since .toSet() iterates.
+                        _currentLinks.postValue(currentLinks.toSet())
+                    }
+                }, subtitleCallback = {
                     currentSubs.add(it)
-                    // _currentSubs.postValue(currentSubs) // this causes ConcurrentModificationException, so fuck it
+                    normalSafeApiCall {
+                        _currentSubs.postValue(currentSubs.toSet())
+                    }
                 })
             }
 

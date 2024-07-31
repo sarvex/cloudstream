@@ -4,8 +4,10 @@ import android.util.Log
 import android.util.TypedValue
 import android.view.ViewGroup
 import android.widget.FrameLayout
-import com.google.android.exoplayer2.ui.SubtitleView
-import com.google.android.exoplayer2.util.MimeTypes
+import androidx.annotation.OptIn
+import androidx.media3.common.MimeTypes
+import androidx.media3.common.util.UnstableApi
+import androidx.media3.ui.SubtitleView
 import com.lagradost.cloudstream3.SubtitleFile
 import com.lagradost.cloudstream3.ui.player.CustomDecoder.Companion.regexSubtitlesToRemoveBloat
 import com.lagradost.cloudstream3.ui.player.CustomDecoder.Companion.regexSubtitlesToRemoveCaptions
@@ -30,13 +32,15 @@ enum class SubtitleOrigin {
  * @param name To be displayed in the player
  * @param url Url for the subtitle, when EMBEDDED_IN_VIDEO this variable is used as the real backend id
  * @param headers if empty it will use the base onlineDataSource headers else only the specified headers
+ * @param languageCode Not guaranteed to follow any standard. Could be something like "English 4" or "en".
  * */
 data class SubtitleData(
     val name: String,
     val url: String,
     val origin: SubtitleOrigin,
     val mimeType: String,
-    val headers: Map<String, String>
+    val headers: Map<String, String>,
+    val languageCode: String?
 ) {
     /** Internal ID for exoplayer, unique for each link*/
     fun getId(): String {
@@ -45,6 +49,7 @@ data class SubtitleData(
     }
 }
 
+@OptIn(UnstableApi::class)
 class PlayerSubtitleHelper {
     private var activeSubtitles: Set<SubtitleData> = emptySet()
     private var allSubtitles: Set<SubtitleData> = emptySet()
@@ -80,7 +85,8 @@ class PlayerSubtitleHelper {
                 url = subtitleFile.url,
                 origin = SubtitleOrigin.URL,
                 mimeType = subtitleFile.url.toSubtitleMimeType(),
-                headers = emptyMap()
+                headers = emptyMap(),
+                languageCode = subtitleFile.lang
             )
         }
     }

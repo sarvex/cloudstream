@@ -2,7 +2,7 @@
 <resources>
     <!-- KEYS DON'T TRANSLATE -->
     <!-- FORMAT MIGHT TRANSLATE, WILL CAUSE CRASH IF APPLIED WRONG -->
-    <string name="app_dub_sub_episode_text_format">%s Ep %d</string>
+    <string name="app_dub_sub_episode_text_format">%1$s Ep %2$d</string>
     <!-- IS NOT NEEDED TO TRANSLATE AS THEY ARE ONLY USED FOR SCREEN READERS AND WONT SHOW UP TO NORMAL USERS -->
     <string name="result_poster_img_des">Poster</string>
     <string name="search_poster_img_des">@string/result_poster_img_des</string>
@@ -16,7 +16,7 @@
     <string name="player_speed_text_format" formatted="true">Bilis (%.2fx)</string>
     <string name="rated_format" formatted="true">Rated: %.1f</string>
     <string name="new_update_format" formatted="true">Bagong update!
-\n%s -&gt; %s</string>
+\n%1$s -&gt; %2$s</string>
     <string name="app_name">CloudStream</string>
     <string name="title_home">Home</string>
     <string name="title_search">Maghanap</string>
@@ -36,7 +36,6 @@
     <string name="type_completed">Tapos nang panoorin</string>
     <string name="type_dropped">Ayaw nang panoorin</string>
     <string name="type_plan_to_watch">Balak panoorin</string>
-    <string name="type_none">None</string>
     <string name="play_movie_button">I-play ang Movie</string>
     <string name="play_torrent_button">Stream Torrent</string>
     <string name="pick_source">Sources</string>
@@ -70,7 +69,6 @@
     <string name="error_bookmarks_text">Bookmark</string>
     <string name="action_remove_from_bookmarks">Tanggalin</string>
     <string name="sort_apply">Kumpirmahin</string>
-    <string name="sort_cancel">Kanselahin</string>
     <string name="player_speed">Bilis ng Playback</string>
     <string name="subtitles_settings">Subtitle Setting</string>
     <string name="subs_text_color">Kulay ng Teksto</string>
@@ -103,7 +101,6 @@
     <string name="player_subtitles_settings">Subtitles</string>
     <string name="player_subtitles_settings_des">Player subtitles settings</string>
     <string name="eigengraumode_settings">Eigengravy Mode</string>
-    <string name="eigengraumode_settings_des">Magdagdag ng \'speed option\' sa \'player\'</string>
     <string name="swipe_to_seek_settings">Swipe to seek</string>
     <string name="swipe_to_seek_settings_des">Swipe pakanan o pakaliwa upang makontrol ang oras ng pinapanood</string>
     <string name="swipe_to_change_settings">Swipe to change settings</string>
@@ -144,6 +141,7 @@
     <string name="episode_short">E</string>
     <string name="delete_file">Burahin ang file</string>
     <string name="delete">Tanggalin</string>
+    <string name="cancel">Kanselahin</string>
     <string name="pause">I-pause</string>
     <string name="resume">I-resume</string>
     <string name="delete_message">This will permanently delete %s
@@ -158,7 +156,7 @@
     <string name="synopsis">Sinopsis</string>
     <string name="queued">nakapila</string>
     <string name="no_subtitles">walang subtitles</string>
-    <string name="default_subtitles">Default</string>
+    <string name="action_default">Default</string>
     <string name="free_storage">Bakante</string>
     <string name="used_storage">Gamit</string>
     <string name="app_storage">App</string>
@@ -215,8 +213,8 @@
     <string name="next_episode_format" formatted="true">Episode %d ay ipapalabas sa loob ng</string>
     <string name="search_hint_site" formatted="true">Hanapin ang %s…</string>
     <string name="duration_format" formatted="true">%d min</string>
-    <string name="next_episode_time_day_format" formatted="true">%dd, %dh:%dm</string>
-    <string name="next_episode_time_hour_format" formatted="true">%dh : %dm</string>
+    <string name="next_episode_time_day_format" formatted="true">%1$dd, %2$dh:%3$dm</string>
+    <string name="next_episode_time_hour_format" formatted="true">%1$dh : %2$dm</string>
     <string name="play_with_app_name">I-play gamit ang CloudStream</string>
     <string name="type_re_watching">Pinapanuod Uli</string>
     <string name="play_livestream_button">Panuorin ang Livestream</string>
@@ -263,4 +261,9 @@
     <string name="add_account">Magdagdag ng Account</string>
     <string name="history">Kasaysayan</string>
     <string name="action_mark_as_watched">I-tanda bilang napanood na</string>
+    <string name="update_started">Nagsimula ang Update</string>
+    <string name="chromecast_subtitles_settings">Mga Subtitle ng Chromecast</string>
+    <string name="chromecast_subtitles_settings_des">Mga setting ng mga subtitle ng Chromecast</string>
+    <string name="play_trailer_button">Maglaro ng Trailer</string>
+    <string name="hide_player_control_names_key" translatable="false">hide_player_control_names_key</string>
 </resources>

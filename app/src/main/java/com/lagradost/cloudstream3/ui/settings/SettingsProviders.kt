@@ -7,24 +7,24 @@ import androidx.navigation.fragment.findNavController
 import androidx.preference.PreferenceFragmentCompat
 import androidx.preference.PreferenceManager
 import com.lagradost.cloudstream3.*
-import com.lagradost.cloudstream3.APIHolder.getApiDubstatusSettings
-import com.lagradost.cloudstream3.APIHolder.getApiProviderLangSettings
-import com.lagradost.cloudstream3.AcraApplication.Companion.removeKey
 import com.lagradost.cloudstream3.ui.APIRepository
 import com.lagradost.cloudstream3.ui.settings.SettingsFragment.Companion.getPref
 import com.lagradost.cloudstream3.ui.settings.SettingsFragment.Companion.setPaddingBottom
+import com.lagradost.cloudstream3.ui.settings.SettingsFragment.Companion.setToolBarScrollFlags
 import com.lagradost.cloudstream3.ui.settings.SettingsFragment.Companion.setUpToolbar
-import com.lagradost.cloudstream3.utils.USER_SELECTED_HOMEPAGE_API
+import com.lagradost.cloudstream3.utils.AppContextUtils.getApiDubstatusSettings
+import com.lagradost.cloudstream3.utils.AppContextUtils.getApiProviderLangSettings
+import com.lagradost.cloudstream3.utils.DataStoreHelper
 import com.lagradost.cloudstream3.utils.SingleSelectionHelper.showMultiDialog
 import com.lagradost.cloudstream3.utils.SubtitleHelper
 import com.lagradost.cloudstream3.utils.UIHelper.hideKeyboard
-import com.lagradost.cloudstream3.utils.UIHelper.navigate
 
 class SettingsProviders : PreferenceFragmentCompat() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         setUpToolbar(R.string.category_providers)
         setPaddingBottom()
+        setToolBarScrollFlags()
     }
 
     override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
@@ -34,7 +34,7 @@ class SettingsProviders : PreferenceFragmentCompat() {
 
         getPref(R.string.display_sub_key)?.setOnPreferenceClickListener {
             activity?.getApiDubstatusSettings()?.let { current ->
-                val dublist = DubStatus.values()
+                val dublist = DubStatus.entries
                 val names = dublist.map { it.name }
 
                 val currentList = ArrayList<Int>()
@@ -96,7 +96,7 @@ class SettingsProviders : PreferenceFragmentCompat() {
                     this.getString(R.string.prefer_media_type_key),
                     selectedList.map { it.toString() }.toMutableSet()
                 ).apply()
-                removeKey(USER_SELECTED_HOMEPAGE_API)
+                DataStoreHelper.currentHomePage = null
                 //(context ?: AcraApplication.context)?.let { ctx -> app.initClient(ctx) }
             }
 
@@ -105,8 +105,10 @@ class SettingsProviders : PreferenceFragmentCompat() {
 
         getPref(R.string.provider_lang_key)?.setOnPreferenceClickListener {
             activity?.getApiProviderLangSettings()?.let { current ->
-                val languages = APIHolder.apis.map { it.lang }.toSet()
-                    .sortedBy { SubtitleHelper.fromTwoLettersToLanguage(it) } + AllLanguagesName
+                val languages = synchronized(APIHolder.apis) {
+                    APIHolder.apis.map { it.lang }.toSet()
+                        .sortedBy { SubtitleHelper.fromTwoLettersToLanguage(it) } + AllLanguagesName
+                }
 
                 val currentList = current.map {
                     languages.indexOf(it)

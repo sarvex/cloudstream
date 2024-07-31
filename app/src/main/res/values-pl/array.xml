@@ -203,12 +203,15 @@
 
     <string-array name="themes_overlay_names">
         <item>Normalny</item>
+        <item>Żółty mniszek lekarski</item>
         <item>Goździk różowy</item>
+        <item>Pomarańczowy</item>
         <item>Ciemnozielony</item>
         <item>Kasztanowaty</item>
         <item>Ciemnoniebieski</item>
         <item>Szary</item>
         <item>Biały</item>
+        <item>Fajny niebieski</item>
         <item>Brązowy</item>
         <item>Niebieski</item>
         <item>Czerwony</item>
@@ -218,17 +221,21 @@
         <item>Bananowy</item>
         <item>Łososiowy</item>
         <item>Świnko peppowy</item>
+        <item>Lawenda</item>
         <item>Material You</item>
         <item>Material You (drugorzędny)</item>
     </string-array>
     <string-array name="themes_overlay_names_values">
         <item>Normal</item>
+        <item>DandelionYellow</item>
         <item>CarnationPink</item>
+        <item>Orange</item>
         <item>DarkGreen</item>
         <item>Maroon</item>
         <item>NavyBlue</item>
         <item>Grey</item>
         <item>White</item>
+        <item>CoolBlue</item>
         <item>Brown</item>
         <item>Blue</item>
         <item>Red</item>
@@ -238,6 +245,7 @@
         <item>Banana</item>
         <item>Party</item>
         <item>Pink</item>
+        <item>Lavender</item>
         <item>Monet</item>
         <item>Monet2</item>
     </string-array>
@@ -248,6 +256,7 @@
         <item>Szary</item>
         <item>Amoled</item>
         <item>Flashbang</item>
+        <item>System</item>
         <item>Material You</item>
     </string-array>
     <string-array name="themes_names_values">
@@ -255,6 +264,7 @@
         <item>Black</item>
         <item>Amoled</item>
         <item>Light</item>
+        <item>System</item>
         <item>Monet</item>
     </string-array>
 

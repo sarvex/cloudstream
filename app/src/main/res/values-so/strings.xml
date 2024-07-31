@@ -1,15 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="cast_format" formatted="true">Metalaya: %s</string>
-    <string name="next_episode_time_day_format" formatted="true">%dm %ds %dd</string>
-    <string name="next_episode_time_hour_format" formatted="true">%ds %dd</string>
+    <string name="next_episode_time_day_format" formatted="true">%1$dm %2$ds %3$dd</string>
+    <string name="next_episode_time_hour_format" formatted="true">%1$ds %2$dd</string>
     <string name="next_episode_time_min_format" formatted="true">%dd</string>
-    <string name="app_dub_sub_episode_text_format" formatted="true">%s Xlq %d</string>
+    <string name="app_dub_sub_episode_text_format" formatted="true">%1$s Xlq %2$d</string>
     <string name="next_episode_format" formatted="true">Xalqadda %d waxa lasoo deyn doonaa</string>
     <string name="download">Daji</string>
     <string name="download_failed">Dejintii ma guulaysan</string>
     <string name="search">Raadi</string>
     <string name="delete">Tirtir</string>
+    <string name="cancel">Jooji</string>
     <string name="pause">Haki</string>
     <string name="queued">Horran</string>
     <string name="resize_fit">Le-ekaysii shaashadda</string>
@@ -27,7 +28,7 @@
     <string name="title_home">Kadinka</string>
     <string name="rated_format" formatted="true">Qiimaysan: %.1f</string>
     <string name="new_update_format" formatted="true">App cusub baa soo baxay!
-\n%s -&gt; %s</string>
+\n%1$s -&gt; %2$s</string>
     <string name="title_downloads">Soo dejinta</string>
     <string name="title_search">Raadi</string>
     <string name="episode_more_options_des">Dookhyo kale</string>
@@ -46,7 +47,6 @@
     <string name="type_completed">Dhamaystirmay</string>
     <string name="type_dropped">Soo dhacay</string>
     <string name="type_plan_to_watch">Ku talo jira</string>
-    <string name="type_none">Midna</string>
     <string name="play_movie_button">Daaro filinka</string>
     <string name="play_trailer_button">Daar goos-gooska</string>
     <string name="subs_window_color">Midabka daaqadda</string>
@@ -56,7 +56,6 @@
     <string name="play_torrent_button">Daalaco toorentiga</string>
     <string name="pick_subtitle">Qrl-hoosaadka</string>
     <string name="popup_resume_download">Dib u bilow dejinta</string>
-    <string name="sort_cancel">Jooji</string>
     <string name="subs_background_color">Midabka dambeedka</string>
     <string name="pick_source">Xigashooyinka</string>
     <string name="reload_error">Dib u xidhiidhinaya…</string>
@@ -164,7 +163,7 @@
     <string name="lightnovel">Light novel app, isla dhiseyaasha appkan baa leh</string>
     <string name="updates_settings">Tus wixii appka ku cusub</string>
     <string name="redo_setup_process">Dib uso bilow fadhiisinta appka</string>
-    <string name="episode_format" formatted="true">%d %s</string>
+    <string name="episode_format" formatted="true">%1$d %2$s</string>
     <string name="uprereleases_settings">Ku cusbooneysii baahinta ugu horreysa</string>
     <string name="apk_installer_settings">Rakibaha APKga</string>
     <string name="status_ongoing">Socda</string>
@@ -180,10 +179,10 @@
     <string name="synopsis">Dulucuda</string>
     <string name="acra_report_toast">Raalliahow, wuu duqeeyey appku, waxa warbixin cillad-saarka ka caawisa loo direy dhiseyaasha</string>
     <string name="season">Kalka</string>
-    <string name="season_format">%s %d%s</string>
+    <string name="season_format">%1$s %2$d%3$s</string>
     <string name="episode">Xalqad</string>
     <string name="episodes">Xalqado</string>
-    <string name="episodes_range">%d illaa %d</string>
+    <string name="episodes_range">%1$d illaa %2$d</string>
     <string name="season_short">K</string>
     <string name="episode_short">X</string>
     <string name="cartoons">Kartoon</string>
@@ -202,7 +201,7 @@
     <string name="duration">Muddada</string>
     <string name="used_storage">La isticmaalay</string>
     <string name="no_subtitles">Qrl-hoosaad ma leh</string>
-    <string name="default_subtitles">Sidiisaa</string>
+    <string name="action_default">Sidiisaa</string>
     <string name="free_storage">Bilaash</string>
     <string name="app_storage">Appka</string>
     <string name="cartoons_singular">Kartoob</string>
@@ -251,7 +250,6 @@
     <string name="player_subtitles_settings">Qoraal-hoosaadka</string>
     <string name="chromecast_subtitles_settings_des">Habaynta Qrl-hoosaadka Koromakaastiga</string>
     <string name="eigengraumode_settings">Habka Xawaare-kordhinta</string>
-    <string name="eigengraumode_settings_des">Waxaad kordhin karta xawaaraha aad ku daawanayso</string>
     <string name="swipe_to_seek_settings_des">Midig iyo bidix u jiid si aad marba dhinac ugu dhaafiso muqaalka</string>
     <string name="double_tap_to_seek_settings_des">Laba jeer taabo midig ama bidix si aad u dhaafiso ama ku ceshato</string>
     <string name="double_tap_to_seek_settings">Laba jeer taabo si aad u dhaafiso</string>
@@ -362,7 +360,7 @@
     <string name="none">Midna</string>
     <string name="example_site_name">Websaydkayga.com</string>
     <string name="example_lang_name">Koodhka Luuqadda (en)</string>
-    <string name="login_format" formatted="true">%s %s</string>
+    <string name="login_format" formatted="true">%1$s %2$s</string>
     <string name="create_account">Akoon samee</string>
     <string name="upload_sync">Talantaalli</string>
     <string name="sync_score">Qiimaysan</string>
@@ -442,7 +440,7 @@
 \nSababtuna waa in mar dhexdaas ah na dacweeyeen shirkadda Sky UK Limited🤮, markaa si aan mar dambe taasi u dhicin anagu kuma rakibi karno...
 \n
 \nDiscord naga soo qabo ama internetka ka baadh.</string>
-    <string name="download_all_plugins_from_repo">Soo deji dhamaan sidkanayaasha reboositarkan\?</string>
+    <string name="download_all_plugins_from_repo">Soo deji dhamaan sidkanayaasha reboositarkan?</string>
     <string name="result_poster_img_des">Boodhka</string>
     <string name="episode_poster_img_des">Boodhka xalqadda</string>
     <string name="home_main_poster_img_des">Boodhka weyn</string>
@@ -468,8 +466,8 @@
     <string name="plugin_deleted">Waa la tiray sidkanahan</string>
     <string name="plugin_load_fail" formatted="true">Waa ka keeni kari waayey %s</string>
     <string name="is_adult">18+</string>
-    <string name="batch_download_start_format" formatted="true">Waa la dejinayaa %d %s…</string>
-    <string name="batch_download_finish_format" formatted="true">Waa la dejiyey %d %s</string>
+    <string name="batch_download_start_format" formatted="true">Waa la dejinayaa %1$d %2$s…</string>
+    <string name="batch_download_finish_format" formatted="true">Waa la dejiyey %1$d %2$s</string>
     <string name="batch_download_nothing_to_download_format" formatted="true">Dhammaan %s way dejisan yihiin</string>
     <string name="extensions">Kordhiyeyaasha</string>
     <string name="view_public_repositories_button_short">Liiska bulshada kale</string>
@@ -487,4 +485,5 @@
     <string name="skip_type_op">Bilowga</string>
     <string name="skip_type_mixed_op">Bilow isku qasan</string>
     <string name="skip_type_creddits">Qoraalka dhamaadka</string>
+    <string name="hide_player_control_names_key" translatable="false">hide_player_control_names_key</string>
 </resources>

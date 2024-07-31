@@ -7,9 +7,15 @@ import androidx.preference.PreferenceFragmentCompat
 import androidx.preference.PreferenceManager
 import com.lagradost.cloudstream3.R
 import com.lagradost.cloudstream3.mvvm.logError
+import com.lagradost.cloudstream3.ui.settings.Globals.EMULATOR
+import com.lagradost.cloudstream3.ui.settings.Globals.PHONE
+import com.lagradost.cloudstream3.ui.settings.Globals.TV
 import com.lagradost.cloudstream3.ui.settings.SettingsFragment.Companion.getFolderSize
 import com.lagradost.cloudstream3.ui.settings.SettingsFragment.Companion.getPref
+import com.lagradost.cloudstream3.ui.settings.SettingsFragment.Companion.hideOn
+import com.lagradost.cloudstream3.ui.settings.SettingsFragment.Companion.hidePrefs
 import com.lagradost.cloudstream3.ui.settings.SettingsFragment.Companion.setPaddingBottom
+import com.lagradost.cloudstream3.ui.settings.SettingsFragment.Companion.setToolBarScrollFlags
 import com.lagradost.cloudstream3.ui.settings.SettingsFragment.Companion.setUpToolbar
 import com.lagradost.cloudstream3.ui.subtitles.ChromecastSubtitlesFragment
 import com.lagradost.cloudstream3.ui.subtitles.SubtitlesFragment
@@ -23,11 +29,24 @@ class SettingsPlayer : PreferenceFragmentCompat() {
         super.onViewCreated(view, savedInstanceState)
         setUpToolbar(R.string.category_player)
         setPaddingBottom()
+        setToolBarScrollFlags()
     }
     override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
         hideKeyboard()
         setPreferencesFromResource(R.xml.settings_player, rootKey)
         val settingsManager = PreferenceManager.getDefaultSharedPreferences(requireContext())
+
+        //Hide specific prefs on TV/EMULATOR
+        hidePrefs(
+            listOf(
+                R.string.pref_category_gestures_key,
+                R.string.rotate_video_key,
+                R.string.auto_rotate_video_key
+            ),
+            TV or EMULATOR
+        )
+
+        getPref(R.string.pref_category_android_tv_key)?.hideOn(PHONE)
 
         getPref(R.string.video_buffer_length_key)?.setOnPreferenceClickListener {
             val prefNames = resources.getStringArray(R.array.video_buffer_length_names)
@@ -67,10 +86,6 @@ class SettingsPlayer : PreferenceFragmentCompat() {
             return@setOnPreferenceClickListener true
         }
 
-        /*(getPref(R.string.double_tap_seek_time_key) as? SeekBarPreference?)?.let {
-
-        }*/
-
         getPref(R.string.prefer_limit_title_rez_key)?.setOnPreferenceClickListener {
             val prefNames = resources.getStringArray(R.array.limit_title_rez_pref_names)
             val prefValues = resources.getIntArray(R.array.limit_title_rez_pref_values)
@@ -89,8 +104,10 @@ class SettingsPlayer : PreferenceFragmentCompat() {
             return@setOnPreferenceClickListener true
         }
 
+        getPref(R.string.hide_player_control_names_key)?.hideOn(TV)
+
         getPref(R.string.quality_pref_key)?.setOnPreferenceClickListener {
-            val prefValues = Qualities.values().map { it.value }.reversed().toMutableList()
+            val prefValues = Qualities.entries.map { it.value }.reversed().toMutableList()
             prefValues.remove(Qualities.Unknown.value)
 
             val prefNames = prefValues.map { Qualities.getStringByInt(it) }
@@ -98,7 +115,7 @@ class SettingsPlayer : PreferenceFragmentCompat() {
             val currentQuality =
                 settingsManager.getInt(
                     getString(R.string.quality_pref_key),
-                    Qualities.values().last().value
+                    Qualities.entries.last().value
                 )
 
             activity?.showBottomDialog(
@@ -114,7 +131,7 @@ class SettingsPlayer : PreferenceFragmentCompat() {
         }
 
         getPref(R.string.quality_pref_mobile_data_key)?.setOnPreferenceClickListener {
-            val prefValues = Qualities.values().map { it.value }.reversed().toMutableList()
+            val prefValues = Qualities.entries.map { it.value }.reversed().toMutableList()
             prefValues.remove(Qualities.Unknown.value)
 
             val prefNames = prefValues.map { Qualities.getStringByInt(it) }
@@ -122,7 +139,7 @@ class SettingsPlayer : PreferenceFragmentCompat() {
             val currentQuality =
                 settingsManager.getInt(
                     getString(R.string.quality_pref_mobile_data_key),
-                    Qualities.values().last().value
+                    Qualities.entries.last().value
                 )
 
             activity?.showBottomDialog(
@@ -225,6 +242,5 @@ class SettingsPlayer : PreferenceFragmentCompat() {
                 return@setOnPreferenceClickListener true
             }
         }
-
     }
 }

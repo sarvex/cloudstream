@@ -15,10 +15,10 @@
  */
 package com.lagradost.cloudstream3.ui.player;
 
-import static com.google.android.exoplayer2.text.Cue.DIMEN_UNSET;
-import static com.google.android.exoplayer2.text.Cue.LINE_TYPE_NUMBER;
-import static com.google.android.exoplayer2.util.Assertions.checkNotNull;
-import static com.google.android.exoplayer2.util.Assertions.checkState;
+import static androidx.media3.common.text.Cue.DIMEN_UNSET;
+import static androidx.media3.common.text.Cue.LINE_TYPE_NUMBER;
+import static androidx.media3.common.util.Assertions.checkNotNull;
+import static androidx.media3.common.util.Assertions.checkState;
 import static java.lang.annotation.ElementType.TYPE_USE;
 
 import android.os.Handler;
@@ -27,26 +27,28 @@ import android.os.Looper;
 import android.os.Message;
 
 import androidx.annotation.IntDef;
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-
-import com.google.android.exoplayer2.BaseRenderer;
-import com.google.android.exoplayer2.C;
-import com.google.android.exoplayer2.Format;
-import com.google.android.exoplayer2.FormatHolder;
-import com.google.android.exoplayer2.RendererCapabilities;
-import com.google.android.exoplayer2.source.SampleStream.ReadDataResult;
-import com.google.android.exoplayer2.text.Cue;
-import com.google.android.exoplayer2.text.CueGroup;
-import com.google.android.exoplayer2.text.Subtitle;
-import com.google.android.exoplayer2.text.SubtitleDecoder;
-import com.google.android.exoplayer2.text.SubtitleDecoderException;
-import com.google.android.exoplayer2.text.SubtitleDecoderFactory;
-import com.google.android.exoplayer2.text.SubtitleInputBuffer;
-import com.google.android.exoplayer2.text.SubtitleOutputBuffer;
-import com.google.android.exoplayer2.text.TextOutput;
-import com.google.android.exoplayer2.util.Log;
-import com.google.android.exoplayer2.util.MimeTypes;
-import com.google.android.exoplayer2.util.Util;
+import androidx.annotation.OptIn;
+import androidx.media3.common.C;
+import androidx.media3.common.Format;
+import androidx.media3.common.text.Cue;
+import androidx.media3.common.text.CueGroup;
+import androidx.media3.common.MimeTypes;
+import androidx.media3.common.util.Log;
+import androidx.media3.common.util.UnstableApi;
+import androidx.media3.common.util.Util;
+import androidx.media3.exoplayer.BaseRenderer;
+import androidx.media3.exoplayer.FormatHolder;
+import androidx.media3.exoplayer.RendererCapabilities;
+import androidx.media3.exoplayer.source.SampleStream;
+import androidx.media3.exoplayer.text.SubtitleDecoderFactory;
+import androidx.media3.exoplayer.text.TextOutput;
+import androidx.media3.extractor.text.Subtitle;
+import androidx.media3.extractor.text.SubtitleDecoder;
+import androidx.media3.extractor.text.SubtitleDecoderException;
+import androidx.media3.extractor.text.SubtitleInputBuffer;
+import androidx.media3.extractor.text.SubtitleOutputBuffer;
 
 import java.lang.annotation.Documented;
 import java.lang.annotation.Retention;
@@ -65,6 +67,7 @@ import java.util.stream.Collectors;
  * obtained from a {@link SubtitleDecoderFactory}. The actual rendering of the subtitle {@link Cue}s
  * is delegated to a {@link TextOutput}.
  */
+@OptIn(markerClass = UnstableApi.class)
 public class NonFinalTextRenderer extends BaseRenderer implements Callback {
 
     private static final String TAG = "TextRenderer";
@@ -72,7 +75,7 @@ public class NonFinalTextRenderer extends BaseRenderer implements Callback {
     /**
      * @param trackType     The track type that the renderer handles. One of the {@link C} {@code
      *                      TRACK_TYPE_*} constants.
-     * @param outputHandler
+     * @param outputHandler todo description
      */
     public NonFinalTextRenderer(int trackType, @Nullable Handler outputHandler) {
         super(trackType);
@@ -164,13 +167,14 @@ public class NonFinalTextRenderer extends BaseRenderer implements Callback {
         finalStreamEndPositionUs = C.TIME_UNSET;
     }
 
+    @NonNull
     @Override
     public String getName() {
         return TAG;
     }
 
     @Override
-    public @Capabilities int supportsFormat(Format format) {
+    public @Capabilities int supportsFormat(@NonNull Format format) {
         if (decoderFactory.supportsFormat(format)) {
             return RendererCapabilities.create(
                     format.cryptoType == C.CRYPTO_TYPE_NONE ? C.FORMAT_HANDLED : C.FORMAT_UNSUPPORTED_DRM);
@@ -310,7 +314,7 @@ public class NonFinalTextRenderer extends BaseRenderer implements Callback {
                     return;
                 }
                 // Try and read the next subtitle from the source.
-                @ReadDataResult int result = readSource(formatHolder, nextInputBuffer, /* readFlags= */ 0);
+                @SampleStream.ReadDataResult int result = readSource(formatHolder, nextInputBuffer, /* readFlags= */ 0);
                 if (result == C.RESULT_BUFFER_READ) {
                     if (nextInputBuffer.isEndOfStream()) {
                         inputStreamEnded = true;
@@ -413,13 +417,11 @@ public class NonFinalTextRenderer extends BaseRenderer implements Callback {
     @SuppressWarnings("unchecked")
     @Override
     public boolean handleMessage(Message msg) {
-        switch (msg.what) {
-            case MSG_UPDATE_OUTPUT:
-                invokeUpdateOutputInternal((List<Cue>) msg.obj);
-                return true;
-            default:
-                throw new IllegalStateException();
+        if (msg.what == MSG_UPDATE_OUTPUT) {
+            invokeUpdateOutputInternal((List<Cue>) msg.obj);
+            return true;
         }
+        throw new IllegalStateException();
     }
 
     private void invokeUpdateOutputInternal(List<Cue> cues) {
@@ -438,7 +440,6 @@ public class NonFinalTextRenderer extends BaseRenderer implements Callback {
                 }
         ).collect(Collectors.toList());
 
-        output.onCues(fixedCues);
         output.onCues(new CueGroup(fixedCues, 0L));
     }
 

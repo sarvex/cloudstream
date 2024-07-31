@@ -1,16 +1,24 @@
 package com.lagradost.cloudstream3.ui
 
-import com.lagradost.cloudstream3.*
 import com.lagradost.cloudstream3.APIHolder.unixTime
 import com.lagradost.cloudstream3.APIHolder.unixTimeMS
+import com.lagradost.cloudstream3.DubStatus
+import com.lagradost.cloudstream3.ErrorLoadingException
+import com.lagradost.cloudstream3.HomePageResponse
+import com.lagradost.cloudstream3.LoadResponse
+import com.lagradost.cloudstream3.MainAPI
 import com.lagradost.cloudstream3.MainActivity.Companion.afterPluginsLoadedEvent
+import com.lagradost.cloudstream3.MainPageRequest
+import com.lagradost.cloudstream3.SearchResponse
+import com.lagradost.cloudstream3.SubtitleFile
+import com.lagradost.cloudstream3.TvType
+import com.lagradost.cloudstream3.fixUrl
 import com.lagradost.cloudstream3.mvvm.Resource
 import com.lagradost.cloudstream3.mvvm.logError
 import com.lagradost.cloudstream3.mvvm.safeApiCall
 import com.lagradost.cloudstream3.utils.Coroutines.threadSafeListOf
 import com.lagradost.cloudstream3.utils.ExtractorLink
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.GlobalScope.coroutineContext
 import kotlinx.coroutines.async
 import kotlinx.coroutines.delay
@@ -42,7 +50,7 @@ class APIRepository(val api: MainAPI) {
 
         private val cache = threadSafeListOf<SavedLoadResponse>()
         private var cacheIndex: Int = 0
-        const val cacheSize = 20
+        const val CACHE_SIZE = 20
     }
 
     private fun afterPluginsLoaded(forceReload: Boolean) {
@@ -86,9 +94,9 @@ class APIRepository(val api: MainAPI) {
                 val add = SavedLoadResponse(unixTime, response, lookingForHash)
 
                 synchronized(cache) {
-                    if (cache.size > cacheSize) {
+                    if (cache.size > CACHE_SIZE) {
                         cache[cacheIndex] = add // rolling cache
-                        cacheIndex = (cacheIndex + 1) % cacheSize
+                        cacheIndex = (cacheIndex + 1) % CACHE_SIZE
                     } else {
                         cache.add(add)
                     }
@@ -174,7 +182,7 @@ class APIRepository(val api: MainAPI) {
         data: String,
         isCasting: Boolean,
         subtitleCallback: (SubtitleFile) -> Unit,
-        callback: (ExtractorLink) -> Unit
+        callback: (ExtractorLink) -> Unit,
     ): Boolean {
         if (isInvalidData(data)) return false // this makes providers cleaner
         return try {

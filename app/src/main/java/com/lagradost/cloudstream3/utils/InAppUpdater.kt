@@ -23,7 +23,8 @@ import okio.buffer
 import okio.sink
 import java.io.File
 import android.text.TextUtils
-import com.lagradost.cloudstream3.utils.AppUtils.setDefaultFocus
+import com.lagradost.cloudstream3.MainActivity.Companion.deleteFileOnExit
+import com.lagradost.cloudstream3.utils.AppContextUtils.setDefaultFocus
 import java.io.BufferedReader
 import java.io.IOException
 import java.io.InputStreamReader
@@ -31,26 +32,26 @@ import java.io.InputStreamReader
 
 class InAppUpdater {
     companion object {
-        const val GITHUB_USER_NAME = "recloudstream"
-        const val GITHUB_REPO = "cloudstream"
+        private const val GITHUB_USER_NAME = "recloudstream"
+        private const val GITHUB_REPO = "cloudstream"
 
-        const val LOG_TAG = "InAppUpdater"
+        private const val LOG_TAG = "InAppUpdater"
 
         // === IN APP UPDATER ===
         data class GithubAsset(
             @JsonProperty("name") val name: String,
             @JsonProperty("size") val size: Int, // Size bytes
-            @JsonProperty("browser_download_url") val browser_download_url: String, // download link
-            @JsonProperty("content_type") val content_type: String, // application/vnd.android.package-archive
+            @JsonProperty("browser_download_url") val browserDownloadUrl: String, // download link
+            @JsonProperty("content_type") val contentType: String, // application/vnd.android.package-archive
         )
 
         data class GithubRelease(
-            @JsonProperty("tag_name") val tag_name: String, // Version code
+            @JsonProperty("tag_name") val tagName: String, // Version code
             @JsonProperty("body") val body: String, // Desc
             @JsonProperty("assets") val assets: List<GithubAsset>,
-            @JsonProperty("target_commitish") val target_commitish: String, // branch
+            @JsonProperty("target_commitish") val targetCommitish: String, // branch
             @JsonProperty("prerelease") val prerelease: Boolean,
-            @JsonProperty("node_id") val node_id: String //Node Id
+            @JsonProperty("node_id") val nodeId: String //Node Id
         )
 
         data class GithubObject(
@@ -60,7 +61,7 @@ class InAppUpdater {
         )
 
         data class GithubTag(
-            @JsonProperty("object") val github_object: GithubObject,
+            @JsonProperty("object") val githubObject: GithubObject,
         )
 
         data class Update(
@@ -109,18 +110,19 @@ class InAppUpdater {
                 releases.sortedWith(compareBy {
                     versionRegex.find(it.name)?.groupValues?.get(2)
                 }).toList().lastOrNull()*/
-            val found =
+            val foundList =
                 response.filter { rel ->
                     !rel.prerelease
                 }.sortedWith(compareBy { release ->
-                    release.assets.filter { it.content_type == "application/vnd.android.package-archive" }
-                        .getOrNull(0)?.name?.let { it1 ->
+                    release.assets.firstOrNull { it.contentType == "application/vnd.android.package-archive" }?.name?.let { it1 ->
                             versionRegex.find(
                                 it1
-                            )?.groupValues?.get(2)
+                            )?.groupValues?.let {
+                                it[3].toInt() * 100_000_000 + it[4].toInt() * 10_000 + it[5].toInt()
+                            }
                         }
-                }).toList().lastOrNull()
-
+                }).toList()
+            val found = foundList.lastOrNull()
             val foundAsset = found?.assets?.getOrNull(0)
             val currentVersion = packageName?.let {
                 packageManager.getPackageInfo(
@@ -132,7 +134,7 @@ class InAppUpdater {
             foundAsset?.name?.let { assetName ->
                 val foundVersion = versionRegex.find(assetName)
                 val shouldUpdate =
-                    if (foundAsset.browser_download_url != "" && foundVersion != null) currentVersion?.versionName?.let { versionName ->
+                    if (foundAsset.browserDownloadUrl != "" && foundVersion != null) currentVersion?.versionName?.let { versionName ->
                         versionRegexLocal.find(versionName)?.groupValues?.let {
                             it[3].toInt() * 100_000_000 + it[4].toInt() * 10_000 + it[5].toInt()
                         }
@@ -144,10 +146,10 @@ class InAppUpdater {
                 return if (foundVersion != null) {
                     Update(
                         shouldUpdate,
-                        foundAsset.browser_download_url,
+                        foundAsset.browserDownloadUrl,
                         foundVersion.groupValues[2],
                         found.body,
-                        found.node_id
+                        found.nodeId
                     )
                 } else {
                     Update(false, null, null, null, null)
@@ -166,33 +168,33 @@ class InAppUpdater {
 
             val found =
                 response.lastOrNull { rel ->
-                    rel.prerelease || rel.tag_name == "pre-release"
+                    rel.prerelease || rel.tagName == "pre-release"
                 }
             val foundAsset = found?.assets?.filter { it ->
-                it.content_type == "application/vnd.android.package-archive"
+                it.contentType == "application/vnd.android.package-archive"
             }?.getOrNull(0)
 
             val tagResponse =
                 parseJson<GithubTag>(app.get(tagUrl, headers = headers).text)
 
-            Log.d(LOG_TAG, "Fetched GitHub tag: ${tagResponse.github_object.sha.take(7)}")
+            Log.d(LOG_TAG, "Fetched GitHub tag: ${tagResponse.githubObject.sha.take(7)}")
 
             val shouldUpdate =
                 (getString(R.string.commit_hash)
                     .trim { c -> c.isWhitespace() }
                     .take(7)
                         !=
-                        tagResponse.github_object.sha
+                        tagResponse.githubObject.sha
                             .trim { c -> c.isWhitespace() }
                             .take(7))
 
             return if (foundAsset != null) {
                 Update(
                     shouldUpdate,
-                    foundAsset.browser_download_url,
-                    tagResponse.github_object.sha,
+                    foundAsset.browserDownloadUrl,
+                    tagResponse.githubObject.sha.take(10),
                     found.body,
-                    found.node_id
+                    found.nodeId
                 )
             } else {
                 Update(false, null, null, null, null)
@@ -212,7 +214,7 @@ class InAppUpdater {
                 this.cacheDir.listFiles()?.filter {
                     it.name.startsWith(appUpdateName) && it.extension == appUpdateSuffix
                 }?.forEach {
-                    it.deleteOnExit()
+                    deleteFileOnExit(it)
                 }
 
                 val downloadedFile = File.createTempFile(appUpdateName, ".$appUpdateSuffix")
@@ -292,7 +294,13 @@ class InAppUpdater {
                                     update.updateVersion
                                 )
                             )
-                            builder.setMessage("${update.changelog}")
+
+                            val logRegex = Regex("\\[(.*?)\\]\\((.*?)\\)")
+                            val sanitizedChangelog = update.changelog?.replace(logRegex) { matchResult ->
+                                matchResult.groupValues[1]
+                            } // Sanitized because it looks cluttered
+
+                            builder.setMessage(sanitizedChangelog)
 
                             val context = this
                             builder.apply {
@@ -300,7 +308,7 @@ class InAppUpdater {
                                     // Forcefully start any delayed installations
                                     if (ApkInstaller.delayedInstaller?.startInstallation() == true) return@setPositiveButton
 
-                                    showToast(context, R.string.download_started, Toast.LENGTH_LONG)
+                                    showToast(R.string.download_started, Toast.LENGTH_LONG)
 
                                     // Check if the setting hasn't been changed
                                     if (settingsManager.getInt(
@@ -335,7 +343,6 @@ class InAppUpdater {
                                                 if (!downloadUpdate(update.updateURL))
                                                     runOnUiThread {
                                                         showToast(
-                                                            context,
                                                             R.string.download_failed,
                                                             Toast.LENGTH_LONG
                                                         )

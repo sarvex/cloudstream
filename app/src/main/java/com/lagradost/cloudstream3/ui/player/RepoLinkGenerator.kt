@@ -1,14 +1,21 @@
 package com.lagradost.cloudstream3.ui.player
 
 import android.util.Log
+import androidx.media3.common.util.UnstableApi
 import com.lagradost.cloudstream3.APIHolder.getApiFromNameNull
+import com.lagradost.cloudstream3.APIHolder.unixTime
 import com.lagradost.cloudstream3.LoadResponse
 import com.lagradost.cloudstream3.ui.APIRepository
 import com.lagradost.cloudstream3.ui.result.ResultEpisode
 import com.lagradost.cloudstream3.utils.ExtractorLink
-import com.lagradost.cloudstream3.utils.ExtractorUri
 import kotlin.math.max
 import kotlin.math.min
+
+data class Cache(
+    val linkCache: MutableSet<ExtractorLink>,
+    val subtitleCache: MutableSet<SubtitleData>,
+    var lastCachedTimestamp: Long = unixTime
+)
 
 class RepoLinkGenerator(
     private val episodes: List<ResultEpisode>,
@@ -17,7 +24,7 @@ class RepoLinkGenerator(
 ) : IGenerator {
     companion object {
         const val TAG = "RepoLink"
-        val cache: HashMap<Pair<String, Int>, Pair<MutableSet<ExtractorLink>, MutableSet<SubtitleData>>> =
+        val cache: HashMap<Pair<String, Int>, Cache> =
             hashMapOf()
     }
 
@@ -67,18 +74,19 @@ class RepoLinkGenerator(
 
     override suspend fun generateLinks(
         clearCache: Boolean,
-        isCasting: Boolean,
+        type: LoadType,
         callback: (Pair<ExtractorLink?, ExtractorUri?>) -> Unit,
         subtitleCallback: (SubtitleData) -> Unit,
-        offset: Int,
+        offset: Int
     ): Boolean {
+        val allowedTypes = type.toSet()
         val index = currentIndex
         val current = episodes.getOrNull(index + offset) ?: return false
 
-        val (currentLinkCache, currentSubsCache) = if (clearCache) {
-            Pair(mutableSetOf(), mutableSetOf())
+        val (currentLinkCache, currentSubsCache, lastCachedTimestamp) = if (clearCache) {
+            Cache(mutableSetOf(), mutableSetOf(), unixTime)
         } else {
-            cache[Pair(current.apiName, current.id)] ?: Pair(mutableSetOf(), mutableSetOf())
+            cache[current.apiName to current.id] ?: Cache(mutableSetOf(), mutableSetOf(), unixTime)
         }
 
         //val currentLinkCache = if (clearCache) mutableSetOf() else linkCache[index].toMutableSet()
@@ -88,9 +96,15 @@ class RepoLinkGenerator(
         val currentSubsUrls = mutableSetOf<String>()    // makes all subs urls unique
         val currentSubsNames = mutableSetOf<String>()   // makes all subs names unique
 
-        currentLinkCache.forEach { link ->
+        val invalidateCache = unixTime - lastCachedTimestamp  > 60 * 20 // 20 minutes
+        if(invalidateCache){
+            currentLinkCache.clear()
+            currentSubsCache.clear()
+        }
+
+        currentLinkCache.filter { allowedTypes.contains(it.type) }.forEach { link ->
             currentLinks.add(link.url)
-            callback(Pair(link, null))
+            callback(link to null)
         }
 
         currentSubsCache.forEach { sub ->
@@ -108,10 +122,10 @@ class RepoLinkGenerator(
         val result = APIRepository(
             getApiFromNameNull(current.apiName) ?: throw Exception("This provider does not exist")
         ).loadLinks(current.data,
-            isCasting,
-            { file ->
+            isCasting = LoadType.Chromecast == type,
+            subtitleCallback = { file ->
                 val correctFile = PlayerSubtitleHelper.getSubtitleData(file)
-                if (!currentSubsUrls.contains(correctFile.url)) {
+                if (correctFile.url.isNotEmpty() && !currentSubsUrls.contains(correctFile.url)) {
                     currentSubsUrls.add(correctFile.url)
 
                     // this part makes sure that all names are unique for UX
@@ -132,19 +146,21 @@ class RepoLinkGenerator(
                     }
                 }
             },
-            { link ->
+            callback = { link ->
                 Log.d(TAG, "Loaded ExtractorLink: $link")
-                if (!currentLinks.contains(link.url)) {
-                    if (!currentLinkCache.contains(link)) {
-                        currentLinks.add(link.url)
+                if (link.url.isNotEmpty() && !currentLinks.contains(link.url) && !currentLinkCache.contains(link)) {
+                    currentLinks.add(link.url)
+
+                    if (allowedTypes.contains(link.type)) {
                         callback(Pair(link, null))
-                        currentLinkCache.add(link)
-                        //linkCache[index] = currentLinkCache
                     }
+
+                    currentLinkCache.add(link)
+                    // linkCache[index] = currentLinkCache
                 }
             }
         )
-        cache[Pair(current.apiName, current.id)] = Pair(currentLinkCache, currentSubsCache)
+        cache[Pair(current.apiName, current.id)] = Cache(currentLinkCache, currentSubsCache, unixTime)
 
         return result
     }

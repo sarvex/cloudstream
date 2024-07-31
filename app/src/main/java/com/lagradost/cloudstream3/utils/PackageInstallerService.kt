@@ -1,20 +1,21 @@
 package com.lagradost.cloudstream3.utils
 
-import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.PendingIntent
 import android.app.Service
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
+import android.content.pm.ServiceInfo.FOREGROUND_SERVICE_TYPE_DATA_SYNC
 import android.os.Build
 import android.os.IBinder
 import android.util.Log
 import androidx.core.app.NotificationCompat
 import com.lagradost.cloudstream3.MainActivity
+import com.lagradost.cloudstream3.MainActivity.Companion.deleteFileOnExit
 import com.lagradost.cloudstream3.R
 import com.lagradost.cloudstream3.app
-import com.lagradost.cloudstream3.utils.AppUtils.createNotificationChannel
+import com.lagradost.cloudstream3.utils.AppContextUtils.createNotificationChannel
 import com.lagradost.cloudstream3.utils.Coroutines.ioSafe
 import com.lagradost.cloudstream3.utils.UIHelper.colorFromAttribute
 import kotlinx.coroutines.delay
@@ -54,7 +55,11 @@ class PackageInstallerService : Service() {
             UPDATE_CHANNEL_NAME,
             UPDATE_CHANNEL_DESCRIPTION
         )
-        startForeground(UPDATE_NOTIFICATION_ID, baseNotification.build())
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            startForeground(UPDATE_NOTIFICATION_ID, baseNotification.build(), FOREGROUND_SERVICE_TYPE_DATA_SYNC)
+        } else{
+            startForeground(UPDATE_NOTIFICATION_ID, baseNotification.build())
+        }
     }
 
     private val updateLock = Mutex()
@@ -71,7 +76,7 @@ class PackageInstallerService : Service() {
                 this@PackageInstallerService.cacheDir.listFiles()?.filter {
                     it.name.startsWith(appUpdateName) && it.extension == appUpdateSuffix
                 }?.forEach {
-                    it.deleteOnExit()
+                    deleteFileOnExit(it)
                 }
             }
 

@@ -23,7 +23,6 @@
     <string name="type_completed">ahhahooo</string>
     <string name="type_dropped">ooooo haa</string>
     <string name="type_plan_to_watch">aaahhuoh</string>
-    <string name="type_none">aaaghh</string>
     <string name="play_movie_button">aaaaa aaaghh</string>
     <string name="play_torrent_button">aaaghhaaahhu aaaaa</string>
     <string name="pick_source">oha aauuh</string>
@@ -51,7 +50,6 @@
     <string name="error_bookmarks_text">oouuh ooh</string>
     <string name="action_remove_from_bookmarks">aauuh ooh</string>
     <string name="sort_apply">oouuhaooo-ahah</string>
-    <string name="sort_cancel">oooohh</string>
     <string name="player_speed">oouuh aauuh oha</string>
     <string name="subtitles_settings">ouuhhhooooooh ooo-ahah</string>
     <string name="subs_text_color">ohaouuhhh</string>
@@ -84,7 +82,6 @@
     <string name="player_subtitles_settings">ahhhaauugghh</string>
     <string name="player_subtitles_settings_des">oha ooh ouuhhh oooohhahhh ouuhhh</string>
     <string name="eigengraumode_settings">haaahhh ahoouuh</string>
-    <string name="eigengraumode_settings_des">haaoooohhaaahhuoha ouuhhh ah oouuh ohoohaaahhu</string>
     <string name="swipe_to_seek_settings">ohahaaaauugghh ahooo aaahhu</string>
     <string name="swipe_to_seek_settings_des">aaaghh aaaghhohahooooo ouuhhh oouuh ooo-ahahahooo-ahah ohaaaaaghh</string>
     <string name="swipe_to_change_settings">aaaaaahhaaahhuoouuhaaaaa aahooo</string>
@@ -122,6 +119,7 @@
     <string name="episode_short">A</string>
     <string name="delete_file">ooha ohahaaahoooa ahahooo</string>
     <string name="delete">oooooah</string>
+    <string name="cancel">oooohh</string>
     <string name="delete_message">aahhaaaaaahooo aauuh aaahhuaooo-ahahoooohh aoouuhoohoohooo-ahah %s</string>
     <string name="status_ongoing">aaaghhaaaaa</string>
     <string name="status_completed">aauuhaauuh</string>
@@ -133,7 +131,7 @@
     <string name="synopsis">aauugghh ohaaauugghh</string>
     <string name="queued">haaouuhhh</string>
     <string name="no_subtitles">ahaaaaaaaaaahaaaauugghh</string>
-    <string name="default_subtitles">ahooooh</string>
+    <string name="action_default">ahooooh</string>
     <string name="free_storage">ooo-ahahaaaaa</string>
     <string name="used_storage">ahhahhh</string>
     <string name="app_storage">aauugghh</string>
@@ -196,12 +194,12 @@
     <string name="primary_color_settings">a ou oh ouhuouhoaaha</string>
     <string name="show_fillers_settings">aaooohhouhhha hauauuu</string>
     <string name="new_update_format">aaaaaaa uuuuuu
-\n%s -&gt; %s</string>
-    <string name="app_dub_sub_episode_text_format" formatted="true">%s aaou %d</string>
+\n%1$s -&gt; %2$s</string>
+    <string name="app_dub_sub_episode_text_format" formatted="true">%1$s aaou %2$d</string>
     <string name="cast_format" formatted="true">oouaaahh %s</string>
     <string name="next_episode_format" formatted="true">aaaaaaugh ouh %d uuoogahaaah ooua-h-ha</string>
-    <string name="next_episode_time_day_format" formatted="true">%daaa %duuu %dhhhg</string>
-    <string name="next_episode_time_hour_format" formatted="true">%daaaaaaauuhh %doouuahaaha</string>
+    <string name="next_episode_time_day_format" formatted="true">%1$daaa %2$duuu %3$dhhhg</string>
+    <string name="next_episode_time_hour_format" formatted="true">%1$daaaaaaauuhh %2$doouuahaaha</string>
     <string name="next_episode_time_min_format" formatted="true">%dmmmm...</string>
     <string name="player_speed_text_format" formatted="true">aaaaaaaaaaaaahh (%.2foouo)</string>
     <string name="rated_format" formatted="true">aghaaaooo-ough %.1f</string>
@@ -248,4 +246,6 @@
     <string name="clear_history">aoaaaaaoooghhh</string>
     <string name="sort_save">oooooh uuaagh</string>
     <string name="action_open_play">@string/home_play</string>
+    <string name="chromecast_subtitles_settings">oouuhhh ahhooo-ahah</string>
+    <string name="hide_player_control_names_key" translatable="false">hide_player_control_names_key</string>
 </resources>
